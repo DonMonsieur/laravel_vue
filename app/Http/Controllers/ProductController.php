@@ -10,16 +10,28 @@ use Illuminate\Http\Request;
 class ProductController extends Controller
 {
 
-    public function index()
+    public function index(Request $request)
     {
-        $data = Product::all();
+        $perPage = $request->input('per_page', 10);
+
+        $query = Product::query();
+
+        if ($request->has('category')) {
+            $query->where('category', $request->input('category'));
+        }
+
+        $data = $query->paginate($perPage);
+
+        $totalItems = $data->total();
 
         return response()->json([
             'status_code' => 200,
             'message' => 'OK',
-            'data' => $data
+            'data' => $data,
+            'total_items' => $totalItems,
         ], 200);
     }
+
 
     public function store(StoreProductRequest $request)
     {
@@ -69,6 +81,27 @@ class ProductController extends Controller
         return response()->json([
             'status_code' => 200,
             'message' => 'Product Deleted!',
+            'data' => $data
+        ], 200);
+    }
+
+    public function search($name, $description)
+    {
+        $query = Product::query();
+
+        if (!empty($name)) {
+            $query->where('name', 'like', '%' . $name . '%');
+        }
+
+        if (!empty($description)) {
+            $query->where('description', 'like', '%' . $description . '%');
+        }
+
+        $data = $query->get();
+
+        return response()->json([
+            'status_code' => 200,
+            'message' => 'Search Results',
             'data' => $data
         ], 200);
     }
