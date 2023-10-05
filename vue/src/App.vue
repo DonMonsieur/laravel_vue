@@ -3,7 +3,7 @@
 </script>
 
 <template>
-  <div class="text-3x1 font-bold underline">Hello Vue with Tailwind</div>
+  <router-view></router-view>
 </template>
 
 <style scoped></style>
