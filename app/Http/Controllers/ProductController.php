@@ -12,26 +12,35 @@ class ProductController extends Controller
 
     public function index(Request $request)
     {
-        $perPage = $request->input('per_page', 10);
+        $page = $request->query('page');
+        $perPage = $request->query('perPage');
+        $sortBy = $request->query('sortBy', 'id');
+        $sortDirection = $request->query('sortDirection', 'asc');
+        $sortCategory = $request->query('sortCategory');
+        $search = $request->query('search', '');
 
-        $query = Product::query();
+        $productList = Product::getProductsData($perPage, $page, $sortBy, $sortDirection, $sortCategory, $search);
 
-        if ($request->has('category')) {
-            $query->where('category', $request->input('category'));
-        }
-
-        $data = $query->paginate($perPage);
-
-        $totalItems = $data->total();
+        $meta = [
+            'pagination' => [
+                'total' => $productList->total(),
+                'count' => $productList->count(),
+                'per_page' => $productList->perPage(),
+                'current_page' => $productList->currentPage(),
+                'total_pages' => $productList->lastPage(),
+                'links' => [
+                    'next' => $productList->nextPageUrl(),
+                ],
+            ],
+        ];
 
         return response()->json([
             'status_code' => 200,
             'message' => 'OK',
-            'data' => $data,
-            'total_items' => $totalItems,
+            'data' => $productList->items(),
+            'meta' => $meta,
         ], 200);
     }
-
 
     public function store(StoreProductRequest $request)
     {
@@ -85,24 +94,22 @@ class ProductController extends Controller
         ], 200);
     }
 
-    public function search($name, $description)
+    public function getCategory()
     {
-        $query = Product::query();
+        $categories = Product::distinct()->pluck('category')->toArray();
+        $categoryObjects = [];
 
-        if (!empty($name)) {
-            $query->where('name', 'like', '%' . $name . '%');
+        foreach ($categories as $index => $category) {
+            $categoryObjects[] = [
+                'id' => $index + 1,
+                'name' => $category,
+            ];
         }
-
-        if (!empty($description)) {
-            $query->where('description', 'like', '%' . $description . '%');
-        }
-
-        $data = $query->get();
 
         return response()->json([
             'status_code' => 200,
-            'message' => 'Search Results',
-            'data' => $data
+            'message' => 'OK',
+            'data' => $categoryObjects,
         ], 200);
     }
 }
