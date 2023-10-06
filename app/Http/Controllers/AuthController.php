@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\LoginRequest;
 use App\Http\Requests\RegisterRequest;
+use App\Http\Resources\UserResource;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -37,18 +38,38 @@ class AuthController extends Controller
             'password' => $request->password,
         ];
 
-        if (Auth::attempt($credentials)) {
-            return response()->json([
-                'status' => 'success',
-                'message' => 'Login Successful',
-            ], 200);
+        $remember = $credentials['remember_token'] ?? false;
+        unset($credentials['remember']);
+
+        if (!Auth::attempt($credentials, $remember)) {
+            return response([
+                'message' => 'Username/Email or password is incorrect'
+            ], 422);
+        }
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+
+        $token = $user->tokens->first();
+
+        $tokenTest = $user->createToken('myapptoken')->plainTextToken;
+
+        // dd($token);
+
+        if (!$token) {
+            return response([
+                'message' => 'No token found for the user'
+            ], 500);
         }
 
-        return response()->json([
-            'status' => 'error',
-            'message' => 'Invalid credentials',
-        ], 401);
+        return response([
+            'message' => 'Login Successful',
+            'user' => new UserResource($user),
+            'token' => $token,
+            'tokenTest' => $tokenTest
+        ]);
     }
+
+
 
     public function logout(Request $request)
     {
@@ -56,7 +77,20 @@ class AuthController extends Controller
 
         return response()->json([
             'status_code' => 200,
-            'message' => 'Logout Successful',
+            'message' => 'Logged out successfully'
         ], 200);
+    }
+
+    public function getUser(Request $request)
+    {
+        $user = $request->user();
+
+        if (!$user) {
+            return response()->json([
+                'message' => 'Unauthorized',
+            ], 401);
+        }
+
+        return new UserResource($user);
     }
 }

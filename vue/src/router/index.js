@@ -1,25 +1,46 @@
 import { createRouter, createWebHistory } from "vue-router";
-import Home from "../views/Home.vue";
 import Dashboard from "../views/Dashboard.vue";
 import Login from "../views/Login.vue";
 import store from "../store";
+import AppLayout from "../components/AppLayout.vue";
+import Product from "../views/Product.vue";
+import NotFound from "../views/NotFound.vue";
+import Register from "../views/Register.vue";
 
 const routes = [
     {
-        path: "/",
-        name: "home",
-        component: Home,
-    },
-    {
-        path: "/dashboard",
-        name: "dashboard",
-        component: Dashboard,
+        path: "/app",
+        name: "app",
+        component: AppLayout,
         meta: { requiresAuth: true },
+        children: [
+            {
+                path: "/",
+                name: "dashboard",
+                component: Dashboard,
+            },
+            {
+                path: "/product",
+                name: "product",
+                component: Product,
+            },
+        ],
+    },
+
+    {
+        path: "/:pathMatch(.*)",
+        name: "notfound",
+        component: NotFound,
     },
     {
         path: "/login",
         name: "login",
         component: Login,
+    },
+    {
+        path: "/register",
+        name: "register",
+        component: Register,
     },
 ];
 
