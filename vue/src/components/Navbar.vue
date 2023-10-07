@@ -16,23 +16,31 @@
 import { ref } from 'vue'
 import store from "../store/index";
 import router from "../router/index";
+import api from '../config/api';
 
 let loading = ref(false);
 
-function logOut() {
+const logOut = async () => {
     loading.value = true;
-    store.dispatch('logout')
-        .then((response) => {
-            loading.value = false;
-            alert(response.message);
+    store.commit('setUser', { token: null, data: {} });
+    localStorage.removeItem('ACCESS_TOKEN');
+    try {
+        loading.value = true;
+        const response = await api.post('/logout');
+
+        if (response.status === 200) {
             console.log(response);
-            router.push({ name: 'login' });
-        })
-        .catch((error) => {
             loading.value = false;
-            console.error('Logout error:', error);
-        })
+            router.push('/login');
+        } else {
+            console.log('Logout failed:', response);
+        }
+    } catch (error) {
+        console.error('Logout error:', error);
+    }
 }
 </script>
+
+
 
   

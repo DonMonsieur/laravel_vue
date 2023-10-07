@@ -1,4 +1,3 @@
-
 <template>
     <GuestLayout title="Sign in to your account">
         <form class="space-y-6" action="#" method="POST" @submit.prevent="login">
@@ -53,39 +52,46 @@ import { ref } from 'vue'
 import GuestLayout from "../components/GuestLayout.vue";
 import store from "../store/index";
 import router from "../router/index";
+import api from "../config/api";
 
 let loading = ref(false);
-let errorMsg = ref("");
 
 const user = {
     username_or_email: '',
     password: '',
-    remember: false
 }
 
-function login() {
-    loading.value = true;
-    store.dispatch('login', user)
-        .then((response) => {
-            loading.value = false;
-            alert(response.message);
-            router.push({ name: 'dashboard' });
-        })
-        .catch((error) => {
-            loading.value = false;
-            if (error.response) {
-                errorMsg.value = error.response.data;
-                console.error('Login error. Response:', errorMsg.value);
-            } else {
-                console.error('Login error. Response:', error.message);
-            }
-        })
+const login = async () => {
+    const payload = {
+        username_or_email: user.username_or_email,
+        password: user.password,
+    };
+
+    try {
+        loading.value = true;
+        const response = await api.post("/login", payload);
+
+        const data = response.data;
+
+        store.commit('setUser', data.user);
+        store.commit('setToken', data.token);
+
+        const token = localStorage.getItem("ACCESS_TOKEN");
+        console.log("TOKEN: ", token);
+
+        user.username_or_email = '';
+        user.password = '';
+        loading.value = false;
+        router.push('/dashboard');
+    } catch (error) {
+        loading.value = false;
+        if (error.response && error.response.status === 422) {
+            console.log(error);
+        } else {
+            console.log(error);
+        }
+    }
 }
-
-
-
 </script>
-
-  
 
 <style scoped></style>

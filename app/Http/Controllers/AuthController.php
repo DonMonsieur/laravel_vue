@@ -38,20 +38,15 @@ class AuthController extends Controller
             'password' => $request->password,
         ];
 
-        $remember = $credentials['remember_token'] ?? false;
-        unset($credentials['remember']);
-
-        if (!Auth::attempt($credentials, $remember)) {
+        if (!Auth::attempt($credentials)) {
             return response([
                 'message' => 'Username/Email or password is incorrect'
-            ], 422);
+            ], 401);
         }
         /** @var \App\Models\User $user */
         $user = Auth::user();
 
-        $token = $user->tokens->first();
-
-        $tokenTest = $user->createToken('myapptoken')->plainTextToken;
+        $token = $user->createToken('myapptoken')->plainTextToken;
 
         // dd($token);
 
@@ -65,7 +60,6 @@ class AuthController extends Controller
             'message' => 'Login Successful',
             'user' => new UserResource($user),
             'token' => $token,
-            'tokenTest' => $tokenTest
         ]);
     }
 
@@ -78,7 +72,7 @@ class AuthController extends Controller
         return response()->json([
             'status_code' => 200,
             'message' => 'Logged out successfully'
-        ], 200);
+        ], 204);
     }
 
     public function getUser(Request $request)

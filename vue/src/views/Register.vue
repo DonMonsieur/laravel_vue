@@ -66,6 +66,7 @@
 <script setup>
 import GuestLayout from '../components/GuestLayout.vue';
 import api from '../config/api'
+import router from "../router/index";
 
 const user = {
     username: '',
@@ -74,7 +75,7 @@ const user = {
     password_confirmation: ''
 };
 
-async function register() {
+const register = async () => {
     try {
         const response = await api.post('/register', {
             username: user.username,
@@ -85,6 +86,7 @@ async function register() {
 
         if (response.status == 201) {
             alert(response.data.message);
+            router.push('/login')
         }
     } catch (error) {
         if (error.response?.data?.errors) {
@@ -96,9 +98,6 @@ async function register() {
         }
     }
 }
-
-
-
 
 </script>
   
