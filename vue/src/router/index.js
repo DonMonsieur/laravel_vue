@@ -6,6 +6,7 @@ import AppLayout from "../components/AppLayout.vue";
 import Product from "../views/Product.vue";
 import NotFound from "../views/NotFound.vue";
 import Register from "../views/Register.vue";
+import CreateProduct from "../views/CreateProduct.vue";
 
 const routes = [
     {
@@ -23,6 +24,11 @@ const routes = [
                 path: "/product",
                 name: "product",
                 component: Product,
+            },
+            {
+                path: "/product/create",
+                name: "product_create",
+                component: CreateProduct,
             },
         ],
     },

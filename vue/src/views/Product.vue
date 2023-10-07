@@ -3,9 +3,12 @@
         <!-- Filter and Button Container -->
         <div class="flex justify-between mb-4">
             <!-- Button -->
-            <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-                Add Product
-            </button>
+            <router-link to="/product/create">
+                <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                    Add Product
+                </button>
+            </router-link>
+
 
             <!-- Filter Inputs -->
             <div class="flex">
@@ -133,6 +136,11 @@
                             </svg>
                         </a>
 
+                        <!-- Label for current page -->
+                        <div class="flex items-center px-2 text-gray-800">
+                            Page {{ currentPage }}
+                        </div>
+
                         <!-- Next button with click event -->
                         <a href="#" @click="nextPage"
                             class="relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-800 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0">
@@ -144,6 +152,7 @@
                             </svg>
                         </a>
                     </nav>
+
                 </div>
             </div>
         </div>
