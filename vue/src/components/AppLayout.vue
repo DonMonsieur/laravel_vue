@@ -7,7 +7,7 @@
 
             <Navbar />
 
-            <main class="p-6">
+            <main class="p-2">
                 <router-view></router-view>
             </main>
 
