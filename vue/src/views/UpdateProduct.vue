@@ -1,8 +1,8 @@
 <template>
     <div class="flex justify-center items-center">
-        <form class="space-y-8 border-solid max-w-xl w-full" action="#" method="POST" @submit.prevent="createProduct">
+        <form class="space-y-8 border-solid max-w-xl w-full" action="#" method="POST" @submit.prevent="UpdateProduct">
             <div>
-                <label for="name" class="block text-sm font-medium leading-6 text-gray-900">Create new
+                <label for="name" class="block text-sm font-medium leading-6 text-gray-900">Update
                     product</label>
                 <div class="mt-2">
                     <input id="name" name="name" type="text" autocomplete="off" v-model="product.name"
@@ -22,13 +22,11 @@
                     </select>
                 </div>
 
-
-
             </div>
 
             <div>
                 <div class="flex items-center justify-between">
-                    <label for="category" class="block text-sm font-medium leading-6 text-gray-900">Create new
+                    <label for="category" class="block text-sm font-medium leading-6 text-gray-900">Update
                         description</label>
 
                 </div>
@@ -50,12 +48,12 @@
 
             <div class="flex justify-end">
                 <router-link to="/product">
-                    <button type="submit"
+                    <button
                         class="max-w-xs rounded-md bg-blue-600 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">Back</button>
                 </router-link>
 
-                <button
-                    class="max-w-xs ml-2 rounded-md bg-green-600 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">Create
+                <button type="submit"
+                    class="max-w-xs ml-2 rounded-md bg-green-600 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">Save
                 </button>
 
             </div>
@@ -68,16 +66,20 @@
 import { ref, onMounted } from 'vue';
 import api from '../config/api';
 import router from '../router';
+import { useRoute } from 'vue-router';
 
 const categories = ref([]);
 const selectedCategory = ref('');
 const selectedImages = ref([]);
 
-const product = {
+const route = useRoute();
+const id = ref(route.params.id);
+
+const product = ref({
     name: '',
     category: '',
     description: ''
-}
+})
 
 const handleImageChange = (event) => {
     const selectedFiles = event.target.files;
@@ -89,22 +91,23 @@ const handleImageChange = (event) => {
 }
 
 
-const createProduct = async () => {
+const UpdateProduct = async () => {
     try {
         const formData = new FormData();
-        formData.append("name", product.name),
-            formData.append("category", selectedCategory.value),
-            formData.append("description", product.description);
+        formData.append("name", product.value.name);
+        formData.append("category", selectedCategory.value);
+        formData.append("description", product.value.description);
 
+        // Append image files
         for (let i = 0; i < selectedImages.value.length; i++) {
             formData.append("images[]", selectedImages.value[i]);
         }
 
-        const response = await api.post('/product/create', formData);
+        const response = await api.post(`/product/update/${id.value}`, formData);
 
-        if (response.status == 201) {
+        if (response.status == 200) {
             alert(response.data.message);
-            router.push('/product')
+            router.push('/product');
         }
     } catch (error) {
         if (error.response?.data?.errors) {
@@ -115,8 +118,25 @@ const createProduct = async () => {
             console.error('Error:', error.message);
         }
     }
-
 }
+
+
+
+const showCurrentProduct = async () => {
+    const response = await api.get(`/product/${id.value}`);
+
+    // console.log(response.data.data.product);
+    if (response.status == 200) {
+        product.value = {
+            name: response.data.data.product.name,
+            description: response.data.data.product.category,
+        }
+
+        selectedCategory.value = response.data.data.product.category;
+    };
+}
+
+
 
 const getCategories = async () => {
     const response = await api.get('/category');
@@ -126,8 +146,10 @@ const getCategories = async () => {
     }
 }
 
-onMounted(() => {
-    getCategories();
+onMounted(async () => {
+    await showCurrentProduct();
+    await getCategories();
 });
+
 
 </script>

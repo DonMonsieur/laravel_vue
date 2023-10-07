@@ -7,6 +7,7 @@ import Product from "../views/Product.vue";
 import NotFound from "../views/NotFound.vue";
 import Register from "../views/Register.vue";
 import CreateProduct from "../views/CreateProduct.vue";
+import UpdateProduct from "../views/UpdateProduct.vue";
 
 const routes = [
     {
@@ -29,6 +30,12 @@ const routes = [
                 path: "/product/create",
                 name: "product_create",
                 component: CreateProduct,
+            },
+            {
+                path: "/product/update/:id",
+                name: "product_update",
+                component: UpdateProduct,
+                props: true,
             },
         ],
     },
@@ -57,10 +64,8 @@ const router = createRouter({
 
 router.beforeEach((to, from, next) => {
     if (to.meta.requiresAuth && !store.state.user.token) {
-        console.log(store.state.user.token);
         next({ name: "login" });
     } else if (to.meta.requiresGuest && store.state.user.token) {
-        console.log(store.state.user.token);
         next({ name: "dashboard" });
     } else {
         next();

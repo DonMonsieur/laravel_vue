@@ -5,7 +5,9 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreProductRequest;
 use App\Http\Requests\UpdateProductRequest;
 use App\Models\Product;
+use App\Models\ProductImage;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class ProductController extends Controller
 {
@@ -45,52 +47,108 @@ class ProductController extends Controller
     public function store(StoreProductRequest $request)
     {
         $validatedData = $request->validated();
+        $images = $request->file('images');
 
-        $data = Product::create($validatedData);
+        if ($images !== null) {
+            $data = Product::create($validatedData);
 
-        return response()->json([
-            'status_code' => 201,
-            'message' => 'Product Created Successfully!',
-            'data' => $data
-        ], 201);
+            $imageUrls = [];
+
+            foreach ($images as $image) {
+                $imageName = time() . '_' . Str::random(10) . '.' . $image->getClientOriginalExtension();
+                $image->move(public_path('images'), $imageName);
+                $imagePath = 'images/' . $imageName;
+
+                $productImage = new ProductImage(['image_path' => $imagePath]);
+                $data->images()->save($productImage);
+
+                $imageUrls[] = $imagePath;
+            }
+
+            return response()->json([
+                'status_code' => 201,
+                'message' => 'Product Created Successfully!',
+                'data' => $data,
+                'imageUrls' => $imageUrls
+            ], 201);
+        } else {
+            return response()->json([
+                'status_code' => 400,
+                'message' => 'No images were uploaded.',
+            ], 400);
+        }
     }
 
     public function show($id)
     {
-        $data = Product::findOrFail($id);
+        $product = Product::findOrFail($id);
+
+        $images = $product->images;
 
         return response()->json([
             'status_code' => 200,
             'message' => 'OK',
-            'data' => $data
+            'data' => [
+                'product' => $product,
+                'images' => $images,
+            ],
         ], 200);
     }
 
+
     public function update(UpdateProductRequest $request, $id)
     {
-        $data = Product::findOrFail($id);
+        $product = Product::findOrFail($id);
 
         $validatedData = $request->validated();
 
-        $data->update($validatedData);
+        $product->update($validatedData);
+
+        if ($request->hasFile('images')) {
+            $newImages = $request->file('images');
+
+            foreach ($product->images as $existingImage) {
+                $imagePath = public_path($existingImage->image_path);
+                if (file_exists($imagePath)) {
+                    unlink($imagePath);
+                }
+                $existingImage->delete();
+            }
+            foreach ($newImages as $newImage) {
+                $imagePath = $newImage->storeAs('public/images', $newImage->getClientOriginalName());
+                $product->images()->create(['image_path' => $imagePath]);
+            }
+        }
 
         return response()->json([
             'status_code' => 200,
-            'message' => 'Product Updated Successfully!',
-            'data' => $data
+            'message' => 'Product and associated images updated successfully!',
+            'data' => $product
         ], 200);
     }
 
     public function delete($id)
     {
-        $data = Product::findOrFail($id);
+        $product = Product::findOrFail($id);
 
-        $data->delete();
+        $images = $product->images;
+
+        $product->delete();
+
+        foreach ($images as $image) {
+            $imagePath = public_path($image->image_path);
+
+            if (file_exists($imagePath)) {
+                unlink($imagePath);
+            }
+
+            $image->delete();
+        }
 
         return response()->json([
             'status_code' => 200,
-            'message' => 'Product Deleted!',
-            'data' => $data
+            'message' => 'Product and associated images deleted successfully!',
+            'data' => $product
         ], 200);
     }
 

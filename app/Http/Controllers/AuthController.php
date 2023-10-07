@@ -38,7 +38,7 @@ class AuthController extends Controller
             'password' => $request->password,
         ];
 
-        if (!Auth::attempt($credentials)) {
+        if (!Auth::attempt($credentials, $request->input('remember'))) {
             return response([
                 'message' => 'Username/Email or password is incorrect'
             ], 401);

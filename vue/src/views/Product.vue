@@ -5,7 +5,7 @@
             <!-- Button -->
             <router-link to="/product/create">
                 <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-                    Add Product
+                    Create
                 </button>
             </router-link>
 
@@ -17,8 +17,7 @@
                     <!-- Sorting Select -->
                     <div>
                         <select v-model="sortDirection"
-                            class="block w-15 bg-white border border-gray-400 hover:border-gray-500 px-4 py-2 pr-8 rounded shadow leading-tight focus:outline-none focus:shadow-outline"
-                            @change="onSortChange">
+                            class="block w-15 bg-white border border-gray-400 hover:border-gray-500 px-4 py-2 pr-8 rounded shadow leading-tight focus:outline-none focus:shadow-outline">
                             <option value="asc">Ascending</option>
                             <option value="desc">Descending</option>
                         </select>
@@ -65,16 +64,22 @@
                 <!-- Table Body -->
                 <tbody class="text-gray-700">
                     <tr v-for="product in filteredProducts" :key="product.id" class="border-solid border-2 border-gray-500">
+
                         <td class="py-2 px-4 text-left">{{ product.name }}</td>
                         <td class="py-2 px-4 text-left">{{ product.category }}</td>
                         <td class="py-2 px-4 text-left">{{ product.description }}</td>
                         <td class="py-2 px-4 text-center w-1/6">
-                            <button class="text-indigo-600 hover:text-indigo-900 focus:outline-none"
-                                @click="updateProduct(product)">
-                                Update
-                            </button>
-                            <button class="text-red-600 hover:text-red-900 focus:outline-none ml-2"
-                                @click="deleteProduct(product)">
+                            <router-link :to="`/product/update/${product.id}`">
+                                <button
+                                    class="rounded-md bg-blue-600 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
+                                    Update
+                                </button>
+                            </router-link>
+
+
+                            <button
+                                class="rounded-md bg-red-600 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 ml-2"
+                                @click="deleteProduct(product.id)">
                                 Delete
                             </button>
                         </td>
@@ -171,7 +176,7 @@ const total = ref();
 const perPage = ref(10);
 const currentPage = ref(1);
 const totalPages = ref(1);
-const sortDirection = ref('asc');
+const sortDirection = ref('desc');
 
 const previousPage = () => {
     if (currentPage.value > 1) {
@@ -207,6 +212,15 @@ const getProductList = async () => {
     }
 };
 
+const deleteProduct = async (productId) => {
+    const response = await api.delete(`/product/delete/${productId}`);
+
+    if (response.status == 200) {
+        alert(response.data.message);
+        getProductList();
+    }
+}
+
 const getCategories = async () => {
     const response = await api.get('/category');
 
@@ -239,6 +253,7 @@ const filteredProducts = computed(() => {
         return products.value.filter(product => product.category === selectedCategory.value);
     }
 });
+
 </script>
 
 <style scoped></style>

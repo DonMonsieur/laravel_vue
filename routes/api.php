@@ -19,14 +19,6 @@ use Illuminate\Support\Facades\Route;
 // Authenticated Routes
 Route::middleware('auth:sanctum')->group(function () {
 
-    Route::prefix('/product')->group(function () {
-        Route::get('/list', [ProductController::class, 'index']);
-        Route::get('/{id}', [ProductController::class, 'show']);
-        Route::post('/create', [ProductController::class, 'store']);
-        Route::put('/update/{id}', [ProductController::class, 'update']);
-        Route::delete('/delete/{id}', [ProductController::class, 'delete']);
-    });
-
     Route::get('/category', [ProductController::class, 'getCategory']);
 
     Route::get('/user', [AuthController::class, 'getUser']);
@@ -36,3 +28,11 @@ Route::middleware('auth:sanctum')->group(function () {
 //Public Routes
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
+
+Route::prefix('/product')->group(function () {
+    Route::get('/list', [ProductController::class, 'index']);
+    Route::get('/{id}', [ProductController::class, 'show']);
+    Route::post('/create', [ProductController::class, 'store']);
+    Route::post('/update/{id}', [ProductController::class, 'update']);
+    Route::delete('/delete/{id}', [ProductController::class, 'delete']);
+});

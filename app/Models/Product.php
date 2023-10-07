@@ -15,6 +15,11 @@ class Product extends Model
         'description',
     ];
 
+    public function images()
+    {
+        return $this->hasMany(ProductImage::class);
+    }
+
     public static function getProductsData($perPage, $page, $sortBy = 'id', $sortDirection = 'asc', $sortCategory, $search)
     {
         $query = self::select([

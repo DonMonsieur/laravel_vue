@@ -12,6 +12,10 @@
                         class="text-white hover:bg-gray-700 block p-2 rounded transition duration-200">
                         Products
                     </router-link>
+                    <router-link to="/product/create"
+                        class="text-white hover:bg-gray-700 block p-2 rounded transition duration-200">
+                        Create Product
+                    </router-link>
                 </nav>
             </div>
 

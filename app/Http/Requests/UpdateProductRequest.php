@@ -21,10 +21,18 @@ class UpdateProductRequest extends FormRequest
      */
     public function rules(): array
     {
-        return [
-            'name' => 'required|string|max:25|unique:products,name',
-            'category' => 'required|string|max:55|unique:products,category',
-            'description' => 'required|string'
+        $rules = [
+            'name' => 'sometimes|string|max:25|unique:products,name,' . $this->id,
+            'category' => 'sometimes|string|max:55|unique:products,category,' . $this->id,
+            'description' => 'nullable|string',
         ];
+
+        // Conditionally apply validation rules for images when changes are made
+        if (!empty($this->input('images'))) {
+            $rules['images'] = 'array|min:1';
+            $rules['images.*'] = 'image|mimes:jpeg,jpg,png|max:10000';
+        }
+
+        return $rules;
     }
 }
