@@ -87,4 +87,15 @@ class AuthController extends Controller
 
         return new UserResource($user);
     }
+
+    public function countUser()
+    {
+        $data = User::countUsers();
+
+        return response()->json([
+            'status_code' => 200,
+            'message' => 'OK',
+            'data' => $data
+        ], 200);
+    }
 }

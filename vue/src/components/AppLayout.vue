@@ -1,18 +1,14 @@
 <template>
-    <div class="min-h-full bg-gray-200 flex">
+    <div class="relative min-h-screen bg-gray-300">
+        <Navbar />
 
-        <Sidebar />
+        <div class="absolute top-16 left-0 right-0 bottom-0 flex">
+            <Sidebar />
 
-        <div class="flex-1">
-
-            <Navbar />
-
-            <main class="p-2">
+            <main class="p-2 flex-1">
                 <router-view></router-view>
             </main>
-
         </div>
-
     </div>
 </template>
 

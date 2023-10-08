@@ -170,4 +170,15 @@ class ProductController extends Controller
             'data' => $categoryObjects,
         ], 200);
     }
+
+    public function countProduct()
+    {
+        $data = Product::countProducts();
+
+        return response()->json([
+            'status_code' => 200,
+            'message' => 'OK',
+            'data' => $data
+        ], 200);
+    }
 }

@@ -42,4 +42,11 @@ class Product extends Model
 
         return $query->paginate($perPage, ['*'], 'page', $page);
     }
+
+    public static function countProducts()
+    {
+        $query = self::select('id');
+
+        return $query->count();
+    }
 }
